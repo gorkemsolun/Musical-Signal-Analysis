@@ -22,6 +22,26 @@ function soundSignals(signal1, signal2, signal3, fs)
     pause(1);
 end
 
+function fourierAnalysis(signal, fs, titleText)
+    % Perform Fourier analysis on the signal
+    N = length(signal);
+    N_2 = floor(N / 2);
+    f = fs * (0:N_2) / N;
+    Y = fft(signal);
+    P2 = abs(Y / N);
+    P1 = P2(1:N_2 + 1);
+    P1(2:end - 1) = 2 * P1(2:end - 1);
+
+    figure;
+    plot(f, P1);
+    title(titleText);
+    xlabel('Frequency (Hz)');
+    ylabel('Amplitude (X(f))');
+    xlim([0, fs / 2]);
+    grid on;
+    pause(1);
+end
+
 %
 % Part 2 Signal Generation
 %
@@ -93,9 +113,9 @@ B_flat_harmonics = zeros(1, length(t));
 
 % Add harmonics to the signals
 for i = 1:length(amplitude_modifiers)
-    E_flat_harmonics = E_flat_harmonics + amplitude_modifiers(i) * cos(2 * pi * i * E_flat_frequency * t);
-    F_sharp_harmonics = F_sharp_harmonics + amplitude_modifiers(i) * cos(2 * pi * i * F_sharp_frequency * t);
-    B_flat_harmonics = B_flat_harmonics + amplitude_modifiers(i) * cos(2 * pi * i * B_flat_frequency * t);
+    E_flat_harmonics = E_flat_harmonics + E_flat_amplitude * amplitude_modifiers(i) * cos(2 * pi * i * E_flat_frequency * t + E_flat_phase);
+    F_sharp_harmonics = F_sharp_harmonics + F_sharp_amplitude * amplitude_modifiers(i) * cos(2 * pi * i * F_sharp_frequency * t + F_sharp_phase);
+    B_flat_harmonics = B_flat_harmonics + B_flat_amplitude * amplitude_modifiers(i) * cos(2 * pi * i * B_flat_frequency * t + B_flat_phase);
 end
 
 chord_harmonics = E_flat_harmonics + F_sharp_harmonics + B_flat_harmonics;
@@ -111,3 +131,56 @@ pause(1);
 % Part 4 Fourier Analysis
 %
 % Perform Fourier analysis on the signals with harmonics
+disp('Performing Fourier analysis on the signals with harmonics');
+fourierAnalysis(E_flat_harmonics, default_fs, 'Fourier Analysis of E flat signal with harmonics');
+fourierAnalysis(F_sharp_harmonics, default_fs, 'Fourier Analysis of F sharp signal with harmonics');
+fourierAnalysis(B_flat_harmonics, default_fs, 'Fourier Analysis of B flat signal with harmonics');
+fourierAnalysis(chord_harmonics, default_fs, 'Fourier Analysis of D♯m Chord signal with harmonics');
+
+%
+% Part 5 Aliasing and reconstruction
+%
+% Intentionally undersample the signals below the Nyquist frequency
+% for the highest note in the chord (B flat) and try to reconstruct
+% original chord and the second, third and fourth harmonics
+aliased_fs = (B_flat_frequency * 3) / 2;
+aliased_t = 0:1 / aliasing_fs:1;
+
+% Generate the aliased original chord
+aliased_chord = interp1(t, chord, aliased_t, 'linear');
+aliased_chord_resampled = interp1(aliased_t, aliased_chord, t, 'linear');
+
+% Generate the aliased harmonics
+aliased_harmonic_fs = (B_flat_frequency * 4 * 3) / 2;
+aliased_harmonic_t = 0:1 / aliased_harmonic_fs:1;
+
+aliased_chord_harmonics = interp1(t, chord_harmonics, aliased_harmonic_t, 'linear');
+aliased_chord_harmonics_resampled = interp1(aliased_harmonic_t, aliased_chord_harmonics, t, 'linear');
+
+disp('Play the original chord');
+sound(chord, default_fs);
+pause(1);
+disp('Playing the aliased original chord');
+sound(aliased_chord_resampled, default_fs);
+pause(1);
+
+disp('Playing the chord with harmonics');
+sound(chord_harmonics, default_fs);
+pause(1);
+disp('Playing the aliased chord with harmonics');
+sound(aliased_chord_harmonics_resampled, default_fs);
+pause(1);
+
+% Plot the signals
+disp('Plotting the signals');
+plotSignal(chord, t, 'D♯m Chord signal');
+plotSignal(aliased_chord_resampled, t, 'Aliased D♯m Chord signal');
+plotSignal(chord_harmonics, t, 'D♯m Chord signal with harmonics');
+plotSignal(aliased_chord_harmonics_resampled, t, 'Aliased D♯m Chord signal with harmonics');
+
+% Perform Fourier analysis on the aliased signals
+disp('Performing Fourier analysis on the aliased signals');
+fourierAnalysis(chord, default_fs, 'Fourier Analysis of D♯m Chord signal');
+fourierAnalysis(aliased_chord_resampled, default_fs, 'Fourier Analysis of Aliased D♯m Chord signal');
+fourierAnalysis(chord_harmonics, default_fs, 'Fourier Analysis of D♯m Chord signal with harmonics');
+fourierAnalysis(aliased_chord_harmonics_resampled, default_fs, 'Fourier Analysis of Aliased D♯m Chord signal with harmonics');
