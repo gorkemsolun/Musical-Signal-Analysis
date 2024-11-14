@@ -48,9 +48,9 @@ end
 
 default_fs = 8000;
 t = 0:1 / default_fs:1;
-E_flat_frequency = 311.13;
-F_sharp_frequency = 369.99;
-B_flat_frequency = 466.16;
+E_flat_frequency = 311; % 311.13 Hz
+F_sharp_frequency = 367; % 369.99 Hz
+B_flat_frequency = 466; % 466.16 Hz
 
 % First generate signals with amplitude 1 and phase 0
 E_flat_signal = cos(2 * pi * E_flat_frequency * t);
@@ -68,10 +68,10 @@ sound(chord, default_fs);
 pause(1);
 
 % Plot the signals
-plotSignal(E_flat_signal, t, 'E flat signal');
-plotSignal(F_sharp_signal, t, 'F sharp signal');
-plotSignal(B_flat_signal, t, 'B flat signal');
-plotSignal(chord, t, 'D♯m Chord signal');
+plotSignal(E_flat_signal, t, 'E flat signal A=1 phase=0');
+plotSignal(F_sharp_signal, t, 'F sharp signal A=1 phase=0');
+plotSignal(B_flat_signal, t, 'B flat signal A=1 phase=0');
+plotSignal(chord, t, 'D♯m Chord signal A=1 phase=0');
 
 % Now amplify the signals according to my ID's last digits 22003214
 E_flat_amplitude = 2;
@@ -97,10 +97,10 @@ sound(chord, default_fs);
 pause(1);
 
 % Plot the signals
-plotSignal(E_flat_signal, t, 'E flat signal');
-plotSignal(F_sharp_signal, t, 'F sharp signal');
-plotSignal(B_flat_signal, t, 'B flat signal');
-plotSignal(chord, t, 'D♯m Chord signal');
+plotSignal(E_flat_signal, t, 'E flat signal A=2 phase=32°');
+plotSignal(F_sharp_signal, t, 'F sharp signal A=1 phase=321°');
+plotSignal(B_flat_signal, t, 'B flat signal A=4 phase=214°');
+plotSignal(chord, t, 'D♯m Chord signal A=2,1,4 phase=32°,321°,214°');
 
 %
 % Part 3 Adding Harmonics
@@ -127,6 +127,12 @@ disp('Playing the chord with harmonics');
 sound(chord_harmonics, default_fs);
 pause(1);
 
+% Plot the signals
+plotSignal(E_flat_harmonics, t, 'E flat signal with harmonics');
+plotSignal(F_sharp_harmonics, t, 'F sharp signal with harmonics');
+plotSignal(B_flat_harmonics, t, 'B flat signal with harmonics');
+plotSignal(chord_harmonics, t, 'D♯m Chord signal with harmonics');
+
 %
 % Part 4 Fourier Analysis
 %
@@ -144,7 +150,7 @@ fourierAnalysis(chord_harmonics, default_fs, 'Fourier Analysis of D♯m Chord si
 % for the highest note in the chord (B flat) and try to reconstruct
 % original chord and the second, third and fourth harmonics
 aliased_fs = (B_flat_frequency * 3) / 2;
-aliased_t = 0:1 / aliasing_fs:1;
+aliased_t = 0:1 / aliased_fs:1;
 
 % Generate the aliased original chord
 aliased_chord = interp1(t, chord, aliased_t, 'linear');
